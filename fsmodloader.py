@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 from bs4 import BeautifulSoup
 
@@ -7,13 +8,15 @@ links_file = 'fsmods.txt'
 
 #Help for this in here https://www.geeksforgeeks.org/downloading-files-web-using-python/
 def get_mod(source, filename, headers):
-	wsize = 0
-	response = requests.get(source, stream = True, headers = headers)
-	with open(filename, 'wb') as zipfile:
-		for chunk in response.iter_content(chunk_size=1024):
-			if chunk:
-				wsize += zipfile.write(chunk)
-	print('Downloaded {} bytes in file {}\n'.format(wsize, filename))
+    wsize = 0
+    response = requests.get(source, stream = True, headers = headers)
+    with open(filename, 'wb') as zipfile:
+        for chunk in response.iter_content(chunk_size=1024):
+            if chunk:
+                wsize += zipfile.write(chunk)
+                sys.stdout.write('Downloaded {} Bytes in file {}\r'.format(wsize, filename))
+                sys.stdout.flush()
+    print('Downloaded {} Bytes in file {}\n'.format(wsize, filename))
 
 #Check if file doesn't exist
 if not os.path.isfile(links_file):
