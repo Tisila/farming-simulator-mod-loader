@@ -10,5 +10,5 @@ Create a file named **fsmods.txt** with one link in each line.
 The script looks for the **fsmods.txt** file and parses it as links, it retrieves the download link and downloads the *.zip* file.
 After editing the script, double-click the *.exe* file and you're good to go.
 
-##TLDR
-Just clone or download the zip, edit the *.txt* file with your favorite mods and run the script, *.exe* or *.py*.
+## TLDR
+Just clone or download, edit the *.txt* file with your favorite mods and run the script, *.exe* or *.py*.
