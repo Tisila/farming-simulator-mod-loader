@@ -7,16 +7,17 @@ from bs4 import BeautifulSoup
 links_file = 'fsmods.txt'
 
 #Help for this in here https://www.geeksforgeeks.org/downloading-files-web-using-python/
-def get_mod(source, filename, headers):
+def get_mod(source, filename, headers, size):
     wsize = 0
     response = requests.get(source, stream = True, headers = headers)
     with open(filename, 'wb') as zipfile:
         for chunk in response.iter_content(chunk_size=1024):
             if chunk:
                 wsize += zipfile.write(chunk)
-                sys.stdout.write('Downloaded {} Bytes in file {}\r'.format(wsize, filename))
+                wsize_MB = wsize/1024/1024
+                sys.stdout.write('Downloaded {:.2f}/{:.2f} MB in file {}\r'.format(wsize_MB, size, 'filename'))
                 sys.stdout.flush()
-    print('Downloaded {} Bytes in file {}\n'.format(wsize, filename))
+    print('Downloaded {:.2f}/{:.2f} MB in file {}\n'.format(wsize_MB, size, 'filename'))  
 
 #Check if file doesn't exist
 if not os.path.isfile(links_file):
@@ -51,7 +52,9 @@ else:
         btn = body.find_all(class_='button-buy')[0]
         mod_link = btn['href']
         mod_name = mod_link.split('/')[-1]
+        size_text = body.find_all(class_='table-cell')[9].get_text()
+        size = float(size_text.split(' ')[0])
         #Downloading the mod
         print('Downloading {}'.format(mod_link))
-        get_mod(mod_link, mod_name, download_headers)
+        get_mod(mod_link, mod_name, download_headers, size)
     print('Download complete!')
