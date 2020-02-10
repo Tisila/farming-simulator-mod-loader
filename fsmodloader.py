@@ -1,5 +1,6 @@
 import os
 import sys
+import datetime
 import requests
 from bs4 import BeautifulSoup
 
@@ -18,13 +19,26 @@ class Mod:
         self._size = 0
         self._unit = ""
         self._filename = ""
+        self._date = datetime.datetime.strptime('1.1.1970', '%d.%m.%Y')
         self.get_information()
 
     def is_updated(self):
-        return False
+        state = False
+        if os.path.isfile(self._filename):
+            ctime = os.lstat(self._filename).st_ctime # for changed time
+            c_date = datetime.datetime.fromtimestamp(ctime)
+            state = c_date > self._date
+        return state
 
     def is_downloaded(self):
         return os.path.isfile(self._filename)
+
+    def is_size_ok(self):
+        if self._unit == 'MB':
+            size = round(os.lstat(self._filename).st_size/1024/1024,2)
+        else:
+            size = round(os.lstat(self._filename).st_size/1024/1024/1024,2)
+        return size == self._size
 
     def get_information(self):
         """
@@ -41,6 +55,8 @@ class Mod:
         size_data = body.find_all(class_='table-cell')[9].get_text().split(' ')
         self._size = float(size_data[0])
         self._unit = size_data[1] 
+        date_data = body.find_all(class_='table-cell')[13].get_text()
+        self._date = datetime.datetime.strptime(date_data, '%d.%m.%Y')
 
     def download(self):
         """
@@ -68,11 +84,11 @@ class Mod:
                     wsize += zipfile.write(chunk)
                     wsize_MB = wsize/1024/1024
                     m = 'Downloaded {:.2f}/{:.2f} MB in file {}\r'
-                    sys.stdout.write(m.format(wsize_MB, self._size, 'filename'))
+                    sys.stdout.write(m.format(wsize_MB, self._size, self._filename))
                     sys.stdout.flush()
         #Download complete
         m = 'Downloaded {:.2f}/{:.2f} MB in file {}\n'
-        print(m.format(wsize_MB, self._size, 'filename'))  
+        print(m.format(wsize_MB, self._size, self._filename))  
 
 if __name__=="__main__":
     #Check if file doesn't exist
@@ -88,14 +104,15 @@ if __name__=="__main__":
 
         print('{} mods to download\n'.format(len(links)))
 
-        #Downloading each mod
+        #Downloading information from each mod in website
         mods = []
         for link in links:
             mods.append(Mod(link))
 
-        #Downloading the mods
+        #Downloading the necessary mods
         for mod in mods:
-            if not mod.updated:
-                print('Downloading {}'.format(mod_link))
-                mod.download(mod_link, mod_name, download_headers, size)
-        print('Download complete!')
+            if mod.is_updated():
+                print('UPDATED {}'.format(mod._filename))
+            else:
+                mod.download()
+        print('\nDownload complete!')
