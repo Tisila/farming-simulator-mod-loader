@@ -34,7 +34,9 @@ class Mod:
         return os.path.isfile(self._filename)
 
     def is_size_ok(self):
-        if self._unit == 'MB':
+        if self._unit == 'KB':
+            size = round(os.lstat(self._filename).st_size/1024,2)
+        elif self._unit == 'MB':
             size = round(os.lstat(self._filename).st_size/1024/1024,2)
         else:
             size = round(os.lstat(self._filename).st_size/1024/1024/1024,2)
