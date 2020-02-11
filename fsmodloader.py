@@ -116,3 +116,4 @@ if __name__=="__main__":
             else:
                 mod.download()
         print('\nDownload complete!')
+        input("-------------------\nPress ENTER to quit\n")
